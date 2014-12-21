@@ -13,6 +13,19 @@ type Host = String
 type SocketEff eff = Eff (socketio :: SocketIO | eff)
 type CbEff eff = Eff (|eff)
 
+
+type ConnectionOptions opts = {allowHalfOpen :: Boolean | opts}
+type TCPOptions = ConnectionOptions (port :: Port, host :: Host, localAddress :: Host)
+type UNIXOptions = ConnectionOptions (path :: String)
+
+
+defaultTCPOptions :: TCPOptions
+defaultTCPOptions = {port: 0, host: "", localAddress: "", allowHalfOpen: false}
+
+defaultUNIXOptions :: UNIXOptions
+defaultUNIXOptions = {path: "", allowHalfOpen: false}
+
+
 instance showSocket :: Show Socket where
   show s | localPort s == Nothing = "(n/a)"
   show s = sla ++ ":" ++ slp ++ "<>" ++ sra ++ ":" ++ srp
@@ -85,7 +98,7 @@ foreign import createConnection
   function createConnection(o) {
     var net = require('net');
     return function() { return net.createConnection(o); };
-  }""" :: forall eff opts. {|opts} -> SocketEff eff Socket
+  }""" :: forall eff opts. ConnectionOptions opts -> SocketEff eff Socket
 
 foreign import writeImpl
   """

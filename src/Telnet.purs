@@ -27,7 +27,7 @@ main = Y.runY setup $ telnet
 
 telnet :: forall eff. String -> Number -> Eff (socketio :: SocketIO, console :: Console |eff) Unit
 telnet host port = do
-  sock <- createConnection {host:host, port:port}
+  sock <- createConnection defaultTCPOptions{host=host, port=port}
   setNoDelay true sock
   onError trace sock
   onEnd (trace "connection closed" *> exit 0) sock
