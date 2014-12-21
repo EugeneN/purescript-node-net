@@ -12,7 +12,8 @@ import qualified Node.Yargs.Setup as Y
 import qualified Node.Yargs.Applicative as Y
 
 foreign import data Process :: !
-foreign import exit """
+foreign import exit
+  """
   function exit(c) {
     return function() { process.exit(c); };
   }""" :: forall eff. Number -> Eff (process :: Process | eff) Unit
