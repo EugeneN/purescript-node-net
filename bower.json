@@ -1,0 +1,20 @@
+{
+  "name": "purescript-node-net",
+  "version": "0.0.1",
+  "moduleType": [
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-foreign": "~0.2.3"
+  },
+  "devDependencies": {
+    "purescript-yargs": "~0.3.0",
+    "purescript-node-readline": "~0.1.2"
+  }
+}
