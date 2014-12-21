@@ -44,7 +44,8 @@ onError = onEvent "error"
 onEnd = onEvent0 "end"
 
 
-foreign import localAddressImpl """
+foreign import localAddressImpl
+  """
   function localAddressImpl(just,nothing,s) {
     var a = s.localAddress;
     return a? just(a) : nothing;
