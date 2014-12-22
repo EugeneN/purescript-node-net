@@ -70,7 +70,7 @@ foreign import localPortImpl
   """
   function localPortImpl(just, nothing, s) {
     var p = s.localPort;
-    return p? just(p) : nothing;
+    return typeof(p) === 'number'? just(p) : nothing;
   }""" :: forall a. Fn3 (a -> Maybe a) (Maybe a) Socket (Maybe Port)
 localPort :: Socket -> Maybe Port
 localPort = runFn3 localPortImpl Just Nothing
