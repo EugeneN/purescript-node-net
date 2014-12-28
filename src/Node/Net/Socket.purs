@@ -17,6 +17,8 @@ type CbEff eff = Eff (|eff)
 type ConnectionOptions opts = {allowHalfOpen :: Boolean | opts}
 type TCPOptions = ConnectionOptions (port :: Port, host :: Host, localAddress :: Host)
 type UNIXOptions = ConnectionOptions (path :: String)
+type ServerOptions = ConnectionOptions ()
+
 
 
 defaultTCPOptions :: TCPOptions
@@ -24,6 +26,9 @@ defaultTCPOptions = {port: 0, host: "", localAddress: "", allowHalfOpen: false}
 
 defaultUNIXOptions :: UNIXOptions
 defaultUNIXOptions = {path: "", allowHalfOpen: false}
+
+defaultServerOptions :: ServerOptions
+defaultServerOptions = {allowHalfOpen: false}
 
 
 instance showSocket :: Show Socket where
@@ -50,11 +55,26 @@ onEvent = runFn3 onEventImpl
 
 onEvent0 e cb = onEvent e (\_ -> cb)
 
+onError = onEvent "error"
 
 onConnect = onEvent0 "connect"
 onData = onEvent "data"
-onError = onEvent "error"
 onEnd = onEvent0 "end"
+
+foreign import onConnectionImpl
+  """
+  function onConnectionImpl(cb, s) {
+    return function() {
+      s.on('connection',function(o){ cb(o)(); });
+    };
+  }""" :: forall eff eff2. Fn2 (Socket -> CbEff eff2 Unit) Socket (SocketEff eff Unit)
+onConnection :: forall eff eff2. (Socket -> CbEff eff2 Unit) -> Socket -> SocketEff eff Unit
+onConnection = runFn2 onConnectionImpl
+
+onListening = onEvent0 "listening"
+onClose = onEvent0 "connect"
+onTimeout = onEvent0 "timeout"
+onDrain = onEvent0 "drain"
 
 
 foreign import localAddressImpl
@@ -92,6 +112,13 @@ foreign import remotePortImpl
   }""" :: forall a. Fn3 (a -> Maybe a) (Maybe a) Socket (Maybe Port)
 remotePort :: Socket -> Maybe Port
 remotePort = runFn3 remotePortImpl Just Nothing
+
+foreign import createServer
+  """
+  function createServer(o) {
+    var net = require('net');
+    return function() { return net.createServer(o); };
+  }""" :: forall eff opts. ServerOptions -> SocketEff eff Socket
 
 foreign import createConnection
   """
@@ -140,3 +167,20 @@ foreign import bytesWritten
   function bytesWritten(s) {
     return function() { return s.bytesWritten; };
   }""" :: forall eff. Socket -> SocketEff eff Number
+
+
+foreign import listenTCPImpl
+  """
+  function listenTCPImpl(h,p,s) {
+    return function() { s.listen(p,h); };
+  }""" :: forall eff. Fn3 Host Port Socket (SocketEff eff Unit)
+listenTCP :: forall eff. Host -> Port -> Socket -> SocketEff eff Unit
+listenTCP = runFn3 listenTCPImpl
+
+foreign import listenUnixImpl
+  """
+  function listenUnixImpl(p,s) {
+    return function() { s.listen(p); };
+  }""" :: forall eff. Fn2 String Socket (SocketEff eff Unit)
+listenUnix :: forall eff. String -> Socket -> SocketEff eff Unit
+listenUnix = runFn2 listenUnixImpl

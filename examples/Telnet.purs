@@ -37,3 +37,4 @@ telnet host port = do
   setPrompt "" 0 interface
   setLineHandler (\l -> write (l++"\n") (return unit) sock) interface
   return unit
+
