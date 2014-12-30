@@ -25,7 +25,7 @@ echo host port = do
     where handle :: forall eff. Socket -> Eff (socketio :: SocketIO, trace :: Trace | eff) Unit
           handle conn = do
             trace $ "connection: " ++ show conn
-            onError trace conn
+            onError (trace <<< show) conn
             onEnd (trace "connection closed") conn
             onData (\d -> write d ignore conn *> return unit) conn
             return unit

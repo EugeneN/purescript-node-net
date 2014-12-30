@@ -29,7 +29,7 @@ telnet :: forall eff. String -> Number -> Eff (socketio :: SocketIO, console :: 
 telnet host port = do
   sock <- createConnection defaultTCPOptions{host=host, port=port}
   setNoDelay true sock
-  onError trace sock
+  onError (\e -> trace (show e) *> exit 1) sock
   onEnd (trace "connection closed" *> exit 0) sock
   onData trace sock
 

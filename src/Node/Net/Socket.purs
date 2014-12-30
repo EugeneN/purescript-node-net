@@ -1,6 +1,7 @@
 module Node.Net.Socket where
 
 import Control.Monad.Eff
+import Control.Monad.Eff.Exception
 import Data.Function
 import Data.Maybe
 
@@ -47,7 +48,7 @@ foreign import onEventImpl
   """
   function onEventImpl(ev, cb, s) {
     return function() {
-      s.on(ev,function(a){ cb(''+a)(); });
+      s.on(ev, function(a){ cb(''+a)(); });
     };
   }""" :: forall eff eff2. Fn3 String (String -> CbEff eff2 Unit) Socket (SocketEff eff Unit)
 onEvent :: forall eff eff2. String -> (String -> CbEff eff2 Unit) -> Socket -> SocketEff eff Unit
@@ -55,11 +56,21 @@ onEvent = runFn3 onEventImpl
 
 onEvent0 e cb = onEvent e (\_ -> cb)
 
-onError = onEvent "error"
-
 onConnect = onEvent0 "connect"
 onData = onEvent "data"
 onEnd = onEvent0 "end"
+
+
+foreign import onErrorImpl
+  """
+  function onErrorImpl(cb, s) {
+    return function() {
+      s.on('error', function(err){ cb(err)(); });
+    };
+  }""" :: forall eff eff2. Fn2 (Error -> CbEff eff2 Unit) Socket (SocketEff eff Unit)
+onError :: forall eff eff2. (Error -> CbEff eff2 Unit) -> Socket -> SocketEff eff Unit
+onError = runFn2 onErrorImpl
+
 
 foreign import onConnectionImpl
   """
