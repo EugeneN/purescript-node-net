@@ -11,10 +11,11 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "~0.2.3"
+    "purescript-foreign": "*",
+    "purescript-exceptions": "*"
   },
   "devDependencies": {
-    "purescript-yargs": "~0.3.0",
-    "purescript-node-readline": "~0.1.2"
+    "purescript-yargs": "*",
+    "purescript-node-readline": "*"
   }
 }
